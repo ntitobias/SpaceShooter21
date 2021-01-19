@@ -41,7 +41,7 @@ namespace SpaceShooter
             // TODO: use this.Content to load your game content here
             
             //Spelaren
-            player = new Player(Content.Load<Texture2D>("ship"),380, 400, 2.5f, 4.5f);
+            player = new Player(Content.Load<Texture2D>("ship"),380, 400, 2.5f, 4.5f,Content.Load<Texture2D>("bullet"));
             goldCoinSprite = Content.Load<Texture2D>("coin");
 
             //Skapa fiender
@@ -53,7 +53,16 @@ namespace SpaceShooter
                 int rndX = random.Next(0, Window.ClientBounds.Width - tmpSprite.Width);
                 int rndY = random.Next(0, Window.ClientBounds.Height / 2);
 
-                Enemy temp = new Enemy(tmpSprite, rndX, rndY);
+                Enemy temp = new Mine(tmpSprite, rndX, rndY);
+                enemies.Add(temp);
+            }
+            tmpSprite = Content.Load<Texture2D>("tripod");
+            for (int i = 0; i < 10; i++)
+            {
+                int rndX = random.Next(0, Window.ClientBounds.Width - tmpSprite.Width);
+                int rndY = random.Next(0, Window.ClientBounds.Height / 2);
+
+                Enemy temp = new Tripod(tmpSprite, rndX, rndY);
                 enemies.Add(temp);
             }
             //För utskrift
@@ -67,11 +76,21 @@ namespace SpaceShooter
 
             // TODO: Add your update logic here
             //spelaren
-            player.Update(Window);
+            player.Update(Window, gameTime);
             
             //fiender
             foreach(Enemy e in enemies.ToList())
             {
+                //Kontrollera om fienden blivit träffad av ett skott
+                foreach(Bullet b in player.Bullets)
+                {
+                    if (e.CheckCollision(b))
+                    {
+                        e.IsAlive = false;
+                        player.Points++;
+                    }
+                }
+
                 if (e.IsAlive) //Kontrollera om fienden lever
                 {
                     //Kontrollera om kollision med spelaren
